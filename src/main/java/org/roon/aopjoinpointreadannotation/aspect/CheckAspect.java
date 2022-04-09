@@ -14,27 +14,18 @@ import java.util.Arrays;
 public class CheckAspect {
 
     @Before("@annotation(CheckRole)")
-    public void checkRoleBefore(JoinPoint joinPoint){
-        String[] roles =  getRoles(joinPoint);
-        String formattedRoles = Arrays.toString(roles);
-
-        System.out.println("Before execution. Roles: " + formattedRoles);
+    public void checkRoleBefore(JoinPoint joinPoint) {
+        System.out.println("Before execution. Roles: " + formatRoles(joinPoint));
     }
 
     @AfterReturning("@annotation(CheckRole)")
-    public void checkRoleAfterSuccess(JoinPoint joinPoint){
-        String[] roles = getRoles(joinPoint);
-        String formattedRoles = Arrays.toString(roles);
-
-        System.out.println("After normally executed. Roles: " + formattedRoles);
+    public void checkRoleAfterSuccess(JoinPoint joinPoint) {
+        System.out.println("After normally executed. Roles: " + formatRoles(joinPoint));
     }
 
     @AfterThrowing("@annotation(CheckRole)")
-    public void checkRoleAfterFailed(JoinPoint joinPoint){
-        String[] roles = getRoles(joinPoint);
-        String formattedRoles = Arrays.toString(roles);
-
-        System.out.println("After exceptionally executed. Roles: " + formattedRoles);
+    public void checkRoleAfterFailed(JoinPoint joinPoint) {
+        System.out.println("After exceptionally executed. Roles: " + formatRoles(joinPoint));
     }
 
     // @Around is special
@@ -42,19 +33,21 @@ public class CheckAspect {
     // 그래서 단순한 JoinPoint 대신 ProceesingJoinPoint 사용
     @Around("@annotation(CheckRole)")
     public void checkRoleAround(ProceedingJoinPoint pJoinPoint) throws Throwable {
-        String[] roles = getRoles(pJoinPoint);
-        String formattedRoles = Arrays.toString(roles);
-
-        System.out.println("Before in @Around "+formattedRoles);
+        System.out.println("Before in @Around " + formatRoles(pJoinPoint));
         Object result = pJoinPoint.proceed();
         System.out.println("After in @Around");
     }
 
-    private String[] getRoles(JoinPoint joinPoint){
+    private String[] getRoles(JoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method method = methodSignature.getMethod();
 
         CheckRole checkRoleAnnotation = method.getAnnotation(CheckRole.class);
         return checkRoleAnnotation.roles();
+    }
+
+    private String formatRoles(JoinPoint joinPoint) {
+        String[] roles = getRoles(joinPoint);
+        return Arrays.toString(roles);
     }
 }
